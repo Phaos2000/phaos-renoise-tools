@@ -14,7 +14,6 @@
       "manifest_name": "Simple Browser",
       "manifest_version": "1.4.4",
       "manifest_api_version": "6.2",
-      "requested_version": "1.4.4 hotfix 1",
       "extracted_files": 13,
       "extraction_byte_verified": true
     },
@@ -31,7 +30,6 @@
       "manifest_name": "Simple Transients",
       "manifest_version": "1.0.3",
       "manifest_api_version": "6.2",
-      "requested_version": "1.0.3",
       "extracted_files": 2,
       "extraction_byte_verified": true
     },
@@ -48,7 +46,6 @@
       "manifest_name": "Simple Xfade",
       "manifest_version": "1.2.0",
       "manifest_api_version": "6.2",
-      "requested_version": "1.1.0",
       "extracted_files": 2,
       "extraction_byte_verified": true
     },
@@ -65,7 +62,6 @@
       "manifest_name": "Simple Interpolation",
       "manifest_version": "1.0.2",
       "manifest_api_version": "6.2",
-      "requested_version": "unspecified",
       "extracted_files": 2,
       "extraction_byte_verified": true
     },
@@ -82,7 +78,6 @@
       "manifest_name": "Simple Notes Off",
       "manifest_version": "1.0.1",
       "manifest_api_version": "6.2",
-      "requested_version": "unspecified",
       "extracted_files": 2,
       "extraction_byte_verified": true
     }
