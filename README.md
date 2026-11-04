@@ -2,17 +2,17 @@
 
 Five tools for Renoise, with their original Lua source, manifests, assets and installable `.xrnx` archives preserved.
 
-| Tool / source | Version in manifest | Features | Original download |
+| Tool / source | Version in manifest | Features | Downloads |
 | --- | --- | --- | --- |
-| [Simple Browser](SimpleBrowser/) | 1.4.4 (hotfix 1 archive) | Keyboard-driven sample browsing, instant preview, recursive search, keyjazz and multi-sample instrument building. | [Forum archive](https://forum.renoise.com/uploads/short-url/qEt8zN6WdrtzcbRXowZPxrQ6Zzm.xrnx) |
-| [Simple Transients](SimpleTransients/) | 1.0.3 | Detect transients, step between hits, adjust selection boundaries and crop hits or loop sections. | [Forum archive](https://forum.renoise.com/uploads/short-url/vXGLJaHfLNZ7cbEBmjuOzHEXhhB.xrnx) |
-| [Simple Xfade](SimpleXfade/) | 1.2.0* | Equal-power loop crossfades for a selected sample region, an existing loop or an instrument's samples. | [Forum archive](https://forum.renoise.com/uploads/short-url/jhloHZ4ZJnFXFwUgoSinmsaNIya.xrnx) |
-| [Simple Interpolation](SimpleInterpolation/) | 1.0.2 | Set interpolation and anti-aliasing for a sample, instrument or song, and defaults for newly loaded samples. | [Forum archive](https://forum.renoise.com/uploads/short-url/4sIlFW8U8z6PzMSvk4YZczdFFzv.xrnx) |
-| [Simple Notes Off](SimpleNotesOff/) | 1.0.1 | Remove note-off events from a track, pattern or whole song while preserving other pattern data. | [Forum archive](https://forum.renoise.com/uploads/short-url/bDnutJSxQXrI7mZhZQ9l35rVXz.xrnx) |
+| [Simple Browser](SimpleBrowser/) | 1.4.4 (hotfix 1 archive) | Keyboard-driven sample browsing, instant preview, recursive search, keyjazz and multi-sample instrument building. | [Download .xrnx](https://github.com/Phaos2000/phaos-renoise-tools/releases/download/simple-browser-v1.4.4-hotfix1/com.phaos.SimpleBrowser-1.4.4-hotfix1.xrnx) · [Release](https://github.com/Phaos2000/phaos-renoise-tools/releases/tag/simple-browser-v1.4.4-hotfix1) · [Forum archive](https://forum.renoise.com/uploads/short-url/qEt8zN6WdrtzcbRXowZPxrQ6Zzm.xrnx) |
+| [Simple Transients](SimpleTransients/) | 1.0.3 | Detect transients, step between hits, adjust selection boundaries and crop hits or loop sections. | [Download .xrnx](https://github.com/Phaos2000/phaos-renoise-tools/releases/download/simple-transients-v1.0.3/com.phaos.SimpleTransients-1.0.3.xrnx) · [Release](https://github.com/Phaos2000/phaos-renoise-tools/releases/tag/simple-transients-v1.0.3) · [Forum archive](https://forum.renoise.com/uploads/short-url/vXGLJaHfLNZ7cbEBmjuOzHEXhhB.xrnx) |
+| [Simple Xfade](SimpleXfade/) | 1.2.0* | Equal-power loop crossfades for a selected sample region, an existing loop or an instrument's samples. | [Download .xrnx](https://github.com/Phaos2000/phaos-renoise-tools/releases/download/simple-xfade-v1.2.0/com.phaos.SimpleXfade-1.2.0.xrnx) · [Release](https://github.com/Phaos2000/phaos-renoise-tools/releases/tag/simple-xfade-v1.2.0) · [Forum archive](https://forum.renoise.com/uploads/short-url/jhloHZ4ZJnFXFwUgoSinmsaNIya.xrnx) |
+| [Simple Interpolation](SimpleInterpolation/) | 1.0.2 | Set interpolation and anti-aliasing for a sample, instrument or song, and defaults for newly loaded samples. | [Download .xrnx](https://github.com/Phaos2000/phaos-renoise-tools/releases/download/simple-interpolation-v1.0.2/com.phaos.SimpleInterpolation-1.0.2.xrnx) · [Release](https://github.com/Phaos2000/phaos-renoise-tools/releases/tag/simple-interpolation-v1.0.2) · [Forum archive](https://forum.renoise.com/uploads/short-url/4sIlFW8U8z6PzMSvk4YZczdFFzv.xrnx) |
+| [Simple Notes Off](SimpleNotesOff/) | 1.0.1 | Remove note-off events from a track, pattern or whole song while preserving other pattern data. | [Download .xrnx](https://github.com/Phaos2000/phaos-renoise-tools/releases/download/simple-notes-off-v1.0.1/com.phaos.SimpleNotesOff-1.0.1.xrnx) · [Release](https://github.com/Phaos2000/phaos-renoise-tools/releases/tag/simple-notes-off-v1.0.1) · [Forum archive](https://forum.renoise.com/uploads/short-url/bDnutJSxQXrI7mZhZQ9l35rVXz.xrnx) |
 
 ## Install
 
-Download a tool from [archives/](archives/) (open the file and choose **Download raw file**) or use its forum download link, then open the `.xrnx` file with Renoise. All five manifests declare Renoise scripting API **6.2**. See each tool's menus, key bindings and help where available.
+Use a **Download .xrnx** link above, or visit [Releases](https://github.com/Phaos2000/phaos-renoise-tools/releases) and download the tool's `.xrnx` attachment under **Assets**. Open it with Renoise. The automatic **Source code** ZIP/tar.gz downloads contain the whole repository and are not tool installers. Original copies also remain in [archives/](archives/) and at the forum links. All five manifests declare Renoise scripting API **6.2**. See each tool's menus, key bindings and help where available.
 
 ## Source and provenance
 
