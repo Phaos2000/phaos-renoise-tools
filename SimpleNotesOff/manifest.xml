@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6.2</ApiVersion>
+  <Id>com.phaos.SimpleNotesOff</Id>
+  <Version>1.0.1</Version>
+  <Author>phaos</Author>
+  <Name>Simple Notes Off</Name>
+  <Category>Pattern Editor</Category>
+  <Description>Deletes note offs and leaves everything else as it is: in the selected track, in every track of the pattern, or in the whole song. Bind the keys in Preferences > Keys > Pattern Editor > Simple Notes Off.</Description>
+</RenoiseScriptingTool>

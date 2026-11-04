@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6.2</ApiVersion>
+  <Id>com.phaos.SimpleXfade</Id>
+  <Version>1.2.0</Version>
+  <Author>phaos</Author>
+  <Name>Simple Xfade</Name>
+  <Category>Sample</Category>
+  <Description>Equal power crossfade loop from one key: select the part to loop in the sample editor and press Crossfade (bind it in Preferences > Keys > Sample Editor > Simple Xfade; also in the sample editor's right-click menu). The audio just before the selection is faded into the loop's end, so it wraps without a click. With nothing selected, the sample's own loop is crossfaded. Crossfade Instrument does the same, with the same selected frames, for every sample of the selected instrument.</Description>
+</RenoiseScriptingTool>

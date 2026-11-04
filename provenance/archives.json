@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "tools": [
+    {
+      "directory": "SimpleBrowser",
+      "archive": "archives/SimpleBrowser-1.4.4-hotfix1.xrnx",
+      "source_url": "https://forum.renoise.com/uploads/short-url/qEt8zN6WdrtzcbRXowZPxrQ6Zzm.xrnx",
+      "resolved_url": "https://forum.renoise.com/uploads/short-url/qEt8zN6WdrtzcbRXowZPxrQ6Zzm.xrnx",
+      "retrieved_utc": "2026-11-04T21:03:36.0000000Z",
+      "http_status": 200,
+      "archive_bytes": 99641,
+      "archive_sha256": "d0c94ff03032125813709a7f4ab4d4972ef76cc62f6591e1bf65799310defabb",
+      "manifest_id": "com.phaos.SimpleBrowser",
+      "manifest_name": "Simple Browser",
+      "manifest_version": "1.4.4",
+      "manifest_api_version": "6.2",
+      "requested_version": "1.4.4 hotfix 1",
+      "extracted_files": 13,
+      "extraction_byte_verified": true
+    },
+    {
+      "directory": "SimpleTransients",
+      "archive": "archives/SimpleTransients-1.0.3.xrnx",
+      "source_url": "https://forum.renoise.com/uploads/short-url/vXGLJaHfLNZ7cbEBmjuOzHEXhhB.xrnx",
+      "resolved_url": "https://forum.renoise.com/uploads/short-url/vXGLJaHfLNZ7cbEBmjuOzHEXhhB.xrnx",
+      "retrieved_utc": "2026-11-04T21:03:36.0000000Z",
+      "http_status": 200,
+      "archive_bytes": 26954,
+      "archive_sha256": "eec81941da4a6e030e45aa41903f4ade595725805b4a64f89344f947c76ae6ba",
+      "manifest_id": "com.phaos.SimpleTransients",
+      "manifest_name": "Simple Transients",
+      "manifest_version": "1.0.3",
+      "manifest_api_version": "6.2",
+      "requested_version": "1.0.3",
+      "extracted_files": 2,
+      "extraction_byte_verified": true
+    },
+    {
+      "directory": "SimpleXfade",
+      "archive": "archives/SimpleXfade.xrnx",
+      "source_url": "https://forum.renoise.com/uploads/short-url/jhloHZ4ZJnFXFwUgoSinmsaNIya.xrnx",
+      "resolved_url": "https://forum.renoise.com/uploads/short-url/jhloHZ4ZJnFXFwUgoSinmsaNIya.xrnx",
+      "retrieved_utc": "2026-11-04T21:03:36.0000000Z",
+      "http_status": 200,
+      "archive_bytes": 3511,
+      "archive_sha256": "9d5d1961874bfd229ec497a07df765400fb057c251c6850b4ca05eec8134ce09",
+      "manifest_id": "com.phaos.SimpleXfade",
+      "manifest_name": "Simple Xfade",
+      "manifest_version": "1.2.0",
+      "manifest_api_version": "6.2",
+      "requested_version": "1.1.0",
+      "extracted_files": 2,
+      "extraction_byte_verified": true
+    },
+    {
+      "directory": "SimpleInterpolation",
+      "archive": "archives/SimpleInterpolation.xrnx",
+      "source_url": "https://forum.renoise.com/uploads/short-url/4sIlFW8U8z6PzMSvk4YZczdFFzv.xrnx",
+      "resolved_url": "https://forum.renoise.com/uploads/short-url/4sIlFW8U8z6PzMSvk4YZczdFFzv.xrnx",
+      "retrieved_utc": "2026-11-04T21:03:40.0000000Z",
+      "http_status": 200,
+      "archive_bytes": 3506,
+      "archive_sha256": "01d7120e72f7851727ae89e87503a38bfb43910ffab942f63ea138deb71eedd8",
+      "manifest_id": "com.phaos.SimpleInterpolation",
+      "manifest_name": "Simple Interpolation",
+      "manifest_version": "1.0.2",
+      "manifest_api_version": "6.2",
+      "requested_version": "unspecified",
+      "extracted_files": 2,
+      "extraction_byte_verified": true
+    },
+    {
+      "directory": "SimpleNotesOff",
+      "archive": "archives/SimpleNotesOff.xrnx",
+      "source_url": "https://forum.renoise.com/uploads/short-url/bDnutJSxQXrI7mZhZQ9l35rVXz.xrnx",
+      "resolved_url": "https://forum.renoise.com/uploads/short-url/bDnutJSxQXrI7mZhZQ9l35rVXz.xrnx",
+      "retrieved_utc": "2026-11-04T21:03:40.0000000Z",
+      "http_status": 200,
+      "archive_bytes": 1845,
+      "archive_sha256": "816999efaabddf4bebc8331c9aabd3288fe3e0403c15fe0208386d43bc4011e8",
+      "manifest_id": "com.phaos.SimpleNotesOff",
+      "manifest_name": "Simple Notes Off",
+      "manifest_version": "1.0.1",
+      "manifest_api_version": "6.2",
+      "requested_version": "unspecified",
+      "extracted_files": 2,
+      "extraction_byte_verified": true
+    }
+  ],
+  "files": [
+    {
+      "path": "SimpleBrowser/Images/xfade.png",
+      "bytes": 143,
+      "sha256": "5a85e95397ea46fc1d2a3407cbec237d17059772219ac195273105a898ecbedc"
+    },
+    {
+      "path": "SimpleBrowser/Images/folder.png",
+      "bytes": 125,
+      "sha256": "f09b08fe4f41fd7bb06d8e06d6d279ce3a2e4ebdf298a298888bd97fd90a7c60"
+    },
+    {
+      "path": "SimpleBrowser/Images/snap.png",
+      "bytes": 208,
+      "sha256": "56a0b26a6a236a88da49ecf98af2e7c888c5d23eee27f0756cf80279c64f8c7b"
+    },
+    {
+      "path": "SimpleBrowser/Images/keyjazz.png",
+      "bytes": 175,
+      "sha256": "b31e57f3677b4951a6a27d7d632aee9641c303de2fe1ead2e5cf630bc749a16a"
+    },
+    {
+      "path": "SimpleBrowser/Images/arrow_right.png",
+      "bytes": 338,
+      "sha256": "f0881f9d9324bca32ed3813ddc687b2538f591bfdf82756033ffa5ce0b80d527"
+    },
+    {
+      "path": "SimpleBrowser/Images/arrow_left.png",
+      "bytes": 344,
+      "sha256": "59ac7ed69e8dbd1524db7cfc99c3b8b864e1198b157d0269fc7eae332923bfd0"
+    },
+    {
+      "path": "SimpleBrowser/Images/find.png",
+      "bytes": 512,
+      "sha256": "f56443a8f894bab5f9d0f561d3525c0b78786a132f03a1d5aa1f58c25373b24d"
+    },
+    {
+      "path": "SimpleBrowser/Images/menu.png",
+      "bytes": 96,
+      "sha256": "4eb7678f188ef3118c2d66f9a07d52ee64cf6f80878eb61fba387603b2ffa199"
+    },
+    {
+      "path": "SimpleBrowser/Images/multisample.png",
+      "bytes": 131,
+      "sha256": "c7ba4309606b27da02bf150e7340a2caf29c64da9ea01aefa62ab4db96840881"
+    },
+    {
+      "path": "SimpleBrowser/Images/piano.png",
+      "bytes": 606,
+      "sha256": "005b33b79ea732808fe88ef524c4f4ebc075bc055ca0fcf0b1a275114612d824"
+    },
+    {
+      "path": "SimpleBrowser/Images/speaker.png",
+      "bytes": 504,
+      "sha256": "2639b4c256a8684284d6c9a2f8a7d46d8491a4a8b142be599d62208d551b74ab"
+    },
+    {
+      "path": "SimpleBrowser/manifest.xml",
+      "bytes": 819,
+      "sha256": "26236f0a053d0613ac4f465bc35aa6154f20f91533bf87354dd809f071cbb61d"
+    },
+    {
+      "path": "SimpleBrowser/main.lua",
+      "bytes": 339501,
+      "sha256": "56a50851c8b90740064b145b8856c2abccadb568a77b9ee2f4b03cef0252a239"
+    },
+    {
+      "path": "SimpleTransients/manifest.xml",
+      "bytes": 708,
+      "sha256": "c4861d19d00d780951cd3eec039a8278f72bfeb603f2a388d509308fb89bd7bb"
+    },
+    {
+      "path": "SimpleTransients/main.lua",
+      "bytes": 90430,
+      "sha256": "ac24850723e7cff71027bc1b6e0021b139f09a099943fed581d21fb0ee0b5070"
+    },
+    {
+      "path": "SimpleXfade/manifest.xml",
+      "bytes": 788,
+      "sha256": "cdb5cee0d9eb961c04816822794d90125e105ac70f5c9da72ab450d18753e3f6"
+    },
+    {
+      "path": "SimpleXfade/main.lua",
+      "bytes": 9014,
+      "sha256": "8eb18d62c59c487437c7cf0918d5f202b0d92eeb54932bf1feed52aa9ed0a3dd"
+    },
+    {
+      "path": "SimpleInterpolation/manifest.xml",
+      "bytes": 756,
+      "sha256": "94d42854699d439d007768dc15bfe5ddc39849fb5b24ee2bd83f483014b131c9"
+    },
+    {
+      "path": "SimpleInterpolation/main.lua",
+      "bytes": 10351,
+      "sha256": "4aad01024fc280b0fcb764c2473f0e401dd83db0ddd29b2315e4f364526f9fab"
+    },
+    {
+      "path": "SimpleNotesOff/manifest.xml",
+      "bytes": 524,
+      "sha256": "31a5462dd60f86227d67da37a8177fed222e0344eda0d776a68ee34ee4516465"
+    },
+    {
+      "path": "SimpleNotesOff/main.lua",
+      "bytes": 4101,
+      "sha256": "1d6f8877fc5d4db2a62b49afa1c30d4112a166985cbcfbab07310bc3387b3b17"
+    }
+  ],
+  "verification": "Each extracted regular file SHA-256 matches its original ZIP entry. No source, manifest or asset bytes modified. No Renoise runtime test performed."
+}

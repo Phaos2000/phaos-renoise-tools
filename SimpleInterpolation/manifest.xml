@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6.2</ApiVersion>
+  <Id>com.phaos.SimpleInterpolation</Id>
+  <Version>1.0.2</Version>
+  <Author>phaos &amp; claude</Author>
+  <Name>Simple Interpolation</Name>
+  <Category>Sample</Category>
+  <Description>Set sample interpolation (None / Linear / Cubic / Sinc) and Anti-aliasing for the selected sample, the selected instrument or the whole song, from Tools > Simple Interpolation, the sample list / sample editor / instrument box right-click menus, or your own keys (Preferences > Keys > Global > Simple Interpolation). New Samples sets a default that every sample you load, record or drag in gets, in place of Renoise's own.</Description>
+</RenoiseScriptingTool>

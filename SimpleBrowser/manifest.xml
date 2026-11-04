@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6.2</ApiVersion>
+  <Id>com.phaos.SimpleBrowser</Id>
+  <Version>1.4.4</Version>
+  <Author>phaos &amp; claude</Author>
+  <Name>Simple Browser</Name>
+  <Category>Sample</Category>
+  <Description>Keyboard-driven sample browser and importer: instant prehear with waveform, folders and samples panes, find, bookmarks and folder paths, Beatsync (with a length), Interpolation and per-sample Semitone / Fine tune / Panning for everything it plays and loads, per-sample loop, trim, cut and loop crossfade before loading, undo / redo, and a Multi-Sample panel that builds Drumkit / Distribute / Layer instruments. Caps Lock reaches every control by keyboard. Press Help in the browser for all keys.</Description>
+</RenoiseScriptingTool>

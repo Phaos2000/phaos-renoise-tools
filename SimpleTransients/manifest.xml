@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RenoiseScriptingTool doc_version="0">
+  <ApiVersion>6.2</ApiVersion>
+  <Id>com.phaos.SimpleTransients</Id>
+  <Version>1.0.3</Version>
+  <Author>phaos &amp; claude</Author>
+  <Name>Simple Transients</Name>
+  <Category>Sample</Category>
+  <Description>Transient detection for the sample editor, the companion of Simple Browser: step from hit to hit (drum hits in a loop, words in a recording), move the selection's start and end transient by transient, and crop single hits or parts of loops. Sensitivity, Threshold and Min gap tune the detection; the tool suggests keys that are free in your key bindings. Press Help for all keys.</Description>
+</RenoiseScriptingTool>
