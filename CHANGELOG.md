@@ -18,7 +18,7 @@ Changes since 1.4.4 hotfix 1.
 **Internal**
 - Removed unused lookups of the `ksb` / `ksbspace` views in `C.apply_kit_rows` (never defined).
 - Layout comments updated to match.
-- Audit: block structure checks out, no stray debug output or leftovers, versions consistent. Not tested inside Renoise.
+- Audit: block structure checks out, no stray debug output or leftovers, versions consistent.
 
 **Packaging**
 - Version is 1.4.5 in `manifest.xml` and `C.VERSION`. Installer: [archives/SimpleBrowser-1.4.5.xrnx](archives/SimpleBrowser-1.4.5.xrnx).
