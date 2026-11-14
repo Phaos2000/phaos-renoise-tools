@@ -104,7 +104,7 @@ local LOOP_ITEMS = { "Off", "Forward", "Reverse", "PingPong" }  -- = LOOP_MODE_*
 C.INTERP_ITEMS = { "None", "Linear", "Cubic", "Sinc" }   -- = INTERPOLATE_*
 
 local KIT_MODES = { "Drumkit", "Distribute", "Layer" }  -- Renoise keyzone terms
-C.VERSION = "1.4.4"
+C.VERSION = "1.4.5"
 C.LIST_BACK_ITEMS = { "Theme", "Dark", "Grey", "Light", "Custom" }
 C.LIST_BACK_COLORS = { false, { 28, 28, 32 }, { 80, 80, 84 }, { 224, 224, 228 } }
 C.LIST_TEXT_ITEMS = { "Auto", "Light", "Dark", "Custom" }
@@ -126,7 +126,7 @@ C.W = {
 -- Renoise's own icons (Resources/Icons), each with a fallback drawing of ours
 C.ICONS = {
   prehear_on  = { "Icons/Browser_PrehearOn.bmp", "Images/speaker.png" },
-  prehear_off = { "Icons/Browser_PrehearOff.bmp", "Images/speaker.png" },
+  prehear_off = { "Icons/Browser_PrehearOff.bmp", "Images/speaker_off.png" },
   menu        = { "Icons/Options.bmp", "Images/menu.png" },
   multi       = { "Icons/Library.bmp", "Images/multisample.png" },
   piano       = { "Icons/Transport_ChordModeOff.bmp", "Images/piano.png" },
@@ -5689,17 +5689,17 @@ C.BM_W, C.BM_SP = 18, 2            -- bookmark squares (Renoise's preset digits)
 C.OPT_W, C.HELP_W = 56, 56         -- the Options / Help buttons (equal)
 -- The sample panel under the waveform. One pane: two columns, five rows.
 -- Left: level and time (Volume, Panning, Loop + crossfade, and Renoise's
--- two Beatsync rows: [on] [length in lines] [T], and the mode). Right:
+-- two Beatsync rows: [on] [length in lines], and the mode with its [T]). Right:
 -- pitch, then the end of the sampler (Octave, Semitone, Fine tune,
 -- Interpolation) and the last stage, Output.
 --   Volume [spk][vol]   Octave
 --   Panning [C]         Semitone [0 st]
 --   Loop [Fwd][x]       Fine tune [0]
---   Beatsync [ ][16][T] Interpolation
---   Mode [Repitch]      Output
+--   Beatsync [ ][ Auto ] Interpolation
+--   Mode [Repitch][T]   Output
 -- Two panes (more room across, so two rows fewer):
---   Volume   Octave     Beatsync [ ][16][T]  Interpolation
---   Panning  Semitone   Mode                 Output
+--   Volume   Octave     Beatsync [ ][ Auto ] Interpolation
+--   Panning  Semitone   Mode [Repitch][T]    Output
 --   Loop     Fine tune
 -- Labels start flush on the left in a column of their own, the controls
 -- start flush after it; every control block is the same width (C.CW). Every
@@ -5755,8 +5755,8 @@ C.CELL_ITEMS = {
   loop = { { "loop", CW - 28 }, { "xfade_btn", 28 } },
   oct = { { "octave", CW } }, interp = { { "interp", CW } },
   output = { { "output", CW } },
-  sync = { { "sync", 24 }, { "slen", CW - 48 }, { "sync_t", 24 } },
-  mode = { { "mode", CW } },
+  sync = { { "sync", 24 }, { "slen", CW - 24 } },
+  mode = { { "mode", CW - 24 }, { "sync_t", 24 } },
   semi = { { "semi", CW } }, fine = { { "fine", CW } },
   pan = { { "pan", CW } },
 }
@@ -5856,10 +5856,6 @@ function C.apply_kit_rows()
       if extra > 0 then sp.height = extra end
       sp.visible = extra > 0
     end
-    local h = rows * C.ROW_HEIGHT + 2 + extra
-    local space, sb = view("ksbspace"), view("ksb")
-    if space then space.height = h end
-    if sb then sb.height = h end
   end)
   K.top = clamp(K.top, 1, math.max(1, #K.entries - K.rows + 1))
   if K.sel > 0 then
@@ -7063,7 +7059,7 @@ function C.help_text()
     more("first"),
     key("Beatsync", "Fit samples a beat or longer to the song tempo (the"),
     more("check box). The box is the length in lines: set your own"),
-    more("(Off / 0: the browser's own choice; a Multi-Sample row:"),
+    more("(Auto / 0: the browser's own choice; a Multi-Sample row:"),
     more("its Beatsync off)"),
     key("T", "Set Semitone and Fine tune so the sample lasts that"),
     more("many lines at the song tempo, as Renoise's T"),
@@ -8027,7 +8023,7 @@ local function build_ui()
       end,
     }),
     C.framed(vb, "valuebox", {
-      id = "slen", width = C.CW - 52, height = H, min = 0, max = 512, value = 0,
+      id = "slen", width = C.CW - 28, height = H, min = 0, max = 512, value = 0,
       tostring = function(v) return v == 0 and C.sync_zero_text() or tostring(v) end,
       tonumber = function(t)
         t = t:lower()
@@ -8046,6 +8042,14 @@ local function build_ui()
       notifier = function(v)
         if not S.updating_pitch then C.set_pitch("synclen", v) end
       end,
+    }))
+  cell("mode",
+    C.framed(vb, "popup", {
+      id = "mode", width = W1 - 24, height = H, items = C.MODE_ITEMS,
+      bind = prefs.sync_mode,
+      tooltip = "Beatsync mode, as in Renoise's sample properties: Repitch / "
+             .. "Time-Stretch (Percussion) / Time-Stretch (Texture).\n"
+             .. "(key binding: Global > Simple Browser > Cycle Beatsync Mode)",
     }),
     C.framed(vb, "button", {
       id = "sync_t", width = 20, height = H, text = "T",
@@ -8057,13 +8061,6 @@ local function build_ui()
              .. "Pitch to Tempo)",
       notifier = function() C.tempo_tune() end,
     }))
-  cell("mode", C.framed(vb, "popup", {
-    id = "mode", width = W1, height = H, items = C.MODE_ITEMS,
-    bind = prefs.sync_mode,
-    tooltip = "Beatsync mode, as in Renoise's sample properties: Repitch / "
-           .. "Time-Stretch (Percussion) / Time-Stretch (Texture).\n"
-           .. "(key binding: Global > Simple Browser > Cycle Beatsync Mode)",
-  }))
   -- the pitch of the highlighted sample (a file: kept when it is loaded; a
   -- Multi-Sample row: that sample itself), see C.pitch_target
   cell("semi", C.framed(vb, "valuebox", {
@@ -8384,12 +8381,12 @@ local function build_ui()
       get = function() return C.pitch_value("synclen") end,
       set = function(v) C.set_pitch("synclen", v) end,
       show = function() return C.pitch_text("synclen") end },
-    { id = "sync_t", frame = "frame_sync_t", name = "Pitch to tempo (T)",
-      act = function() C.tempo_tune() end },
     pref_stop { id = "interp", pref = "default_interp", frame = "frame_interp",
       name = "Interpolation", n = #C.INTERP_ITEMS },
     pref_stop { id = "mode", pref = "sync_mode", frame = "frame_mode",
       name = "Beatsync mode", n = #C.MODE_ITEMS },
+    { id = "sync_t", frame = "frame_sync_t", name = "Pitch to tempo (T)",
+      act = function() C.tempo_tune() end },
     { id = "output", frame = "frame_output", name = "Prehear output",
       n = #C.OUTPUT_ITEMS,
       get = function() return prefs.prehear_master.value and 1 or 2 end,
@@ -8902,6 +8899,7 @@ function C.button_rest(id)
     multi_btn = prefs.show_kit.value,
     pane_btn = prefs.show_contents.value, find_btn_l = S.find ~= nil,
     find_btn_r = S.find ~= nil, kit_keyjazz = prefs.kit_keyjazz.value,
+    speaker = prefs.autoplay.value,
   }
   return lit[id] and C.LIT or DEFAULT_COLOR
 end
@@ -8917,9 +8915,9 @@ function BM.states()
     C.set_icon(sp, prefs.autoplay.value and "prehear_on" or "prehear_off")
   elseif sp then
     C.tint(sp, prefs.autoplay.value and C.LIT or DEFAULT_COLOR)
-  end
+  end   -- (the lit tint of an icon button comes from C.button_rest below)
   for _, id in ipairs { "multi_btn", "pane_btn", "find_btn_l",
-                        "find_btn_r", "kit_keyjazz" } do
+                        "find_btn_r", "kit_keyjazz", "speaker" } do
     local b = view(id)
     if b then C.tint(b, C.button_rest(id)) end
   end

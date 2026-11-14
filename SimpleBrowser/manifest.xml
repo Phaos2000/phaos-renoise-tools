@@ -2,7 +2,7 @@
 <RenoiseScriptingTool doc_version="0">
   <ApiVersion>6.2</ApiVersion>
   <Id>com.phaos.SimpleBrowser</Id>
-  <Version>1.4.4</Version>
+  <Version>1.4.5</Version>
   <Author>phaos &amp; claude</Author>
   <Name>Simple Browser</Name>
   <Category>Sample</Category>
