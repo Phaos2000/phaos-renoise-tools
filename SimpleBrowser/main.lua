@@ -43,8 +43,8 @@ local SCRATCH_NAMES = {
 
 local VISIBLE_ROWS     = 20
 C.ROW_HEIGHT       = 18
-local PANEL_WIDTH      = 362     -- folder / contents panel, scrollbar included
-local KIT_WIDTH        = 394     -- multi-sample panel, scrollbar included
+local PANEL_WIDTH      = 326     -- folder / contents panel, scrollbar included
+local KIT_WIDTH        = 330     -- multi-sample panel, scrollbar included
                                   -- (its list = 3 buttons of 124 + gaps)
 local SCROLLBAR_WIDTH  = 16
 -- When shown, the waveform extends the Multi-Sample list by KIT_EXTRA rows
@@ -654,6 +654,28 @@ end
 
 local function view(id)
   return S.vb and S.vb.views[id] or nil
+end
+
+-- A failed control says why: the error goes to the status bar and, with its
+-- stack, to error.txt next to main.lua (so it can be sent for a fix).
+function C.log_err(where, err)
+  pcall(function()
+    local msg = tostring(err)
+    local tb = (debug and debug.traceback) and debug.traceback("", 2) or ""
+    local f = io.open((renoise.tool().bundle_path or "") .. "error.txt", "ab")
+    if f then
+      f:write(os.date("%H:%M:%S") .. "  " .. where .. ": " .. msg .. tb .. string.char(10, 10))
+      f:close()
+    end
+    renoise.app():show_status("Simple Browser error (" .. where .. "): "
+      .. msg:sub(1, 160))
+  end)
+end
+function C.try(where, fn, ...)
+  local args = { ... }
+  local ok, err = xpcall(function() return fn(unpack(args)) end,
+    function(e) C.log_err(where, e) return e end)
+  return ok and err or nil
 end
 
 -- Messages go to Renoise's own status bar (no status line in the dialog).
@@ -1462,6 +1484,19 @@ local function info_lines()
   end
   local reminder = prefs.default_loop.value > 1
     and ("DEFAULT LOOP: " .. loop_name(prefs.default_loop.value) .. "  |  ") or ""
+  -- the same facts, one by one (the two-pane panel shows them under bold
+  -- labels); what is not a fact of the file goes in "extra"
+  pcall(function()
+    local extra = reminder:gsub("%s*|%s*$", "") .. sync
+    extra = extra:gsub("^%s+", ""):gsub("%s%s+", "  ")
+    C.info_data = {
+      fmt = fmt, bit = bit, ch = ch, loop = loop, peak = peak,
+      rate = I.rate and string.format("%.1f kHz", I.rate / 1000) or "-",
+      len = fmt_length(I.frames, I.rate, I.approx) or "-",
+      size = fmt_size(I.size) or "-",
+      extra = extra,
+    }
+  end)
   return reminder .. string.format("format: %s  bit: %s  sr: %s  ch: %s  "
     .. "len: %s  size: %s  loop: %s%s  peak: %s" .. sync,
     fmt, bit, I.rate and string.format("%.1f kHz", I.rate / 1000) or "-",
@@ -1510,13 +1545,36 @@ function C.size_info()
   v.height = lines * lh + 2   -- a few px of padding
 end
 
+-- the file's facts beside the grid (two panes with the sample panel): the
+-- field, its bold label
+C.INFO_SIDE = { { "fmt", "Format:" }, { "bit", "Bit:" }, { "len", "Length:" },
+                { "rate", "Rate:" }, { "size", "Size:" }, { "ch", "Ch:" },
+                { "peak", "Peak:" }, { "loop", "Loop:" } }
+function C.side_info() return two_pane() and prefs.show_controls.value end
+
 local function refresh_info_box()
   if not S.vb then return end
   local v = view("info")
-  if v then
-    v.text = info_lines()
-    C.size_info()
-  end
+  local text = info_lines()
+  -- (guarded: the panel's facts must never stop what runs after a refresh,
+  -- such as showing the loop)
+  local ok, err = pcall(function()
+    local D = C.info_data or {}
+    local side = C.side_info()
+    for _, f in ipairs(C.INFO_SIDE) do
+      local sv = view("isv_" .. f[1])
+      if sv then sv.text = tostring(D[f[1]] or "-") end
+    end
+    if v then
+      -- beside the grid the facts are in the panel; the line under the
+      -- window then only carries what is not a fact of the file
+      v.text = side and tostring(D.extra or "") or text
+      v.visible = not side or v.text ~= ""
+      C.size_info()
+    end
+  end)
+  if not ok and v then v.text = text end
+  if not ok then C.log_err("file details", err) end
 end
 
 local function show_file_info(path)
@@ -5685,42 +5743,29 @@ function C.edge()
   return C.left_width() - SCROLLBAR_WIDTH
 end
 
-C.BM_W, C.BM_SP = 18, 2            -- bookmark squares (Renoise's preset digits)
-C.OPT_W, C.HELP_W = 56, 56         -- the Options / Help buttons (equal)
--- The sample panel under the waveform. One pane: two columns, five rows.
--- Left: level and time (Volume, Panning, Loop + crossfade, and Renoise's
--- two Beatsync rows: [on] [length in lines], and the mode with its [T]). Right:
--- pitch, then the end of the sampler (Octave, Semitone, Fine tune,
--- Interpolation) and the last stage, Output.
---   Volume [spk][vol]   Octave
---   Panning [C]         Semitone [0 st]
---   Loop [Fwd][x]       Fine tune [0]
---   Beatsync [ ][ Auto ] Interpolation
---   Mode [Repitch][T]   Output
--- Two panes (more room across, so two rows fewer):
---   Volume   Octave     Beatsync [ ][ Auto ] Interpolation
---   Panning  Semitone   Mode [Repitch][T]    Output
---   Loop     Fine tune
+C.BM_W, C.BM_SP = 16, 2            -- bookmark squares (Renoise's preset digits)
+C.OPT_W, C.HELP_W = 50, 50         -- the Options / Help buttons (equal)
+-- The sample panel under the waveform. Every cell is a label and its
+-- controls, each control only as wide as its content needs (C.CELL_ITEMS).
+-- Two panes: three columns, three rows, with the file details beside them:
+--   Volume [spk][vol]   Octave [03]      Beatsync [ ][ Auto ][T]
+--   Output [Master]     Panning [Center] Loop [Off][X]
+--   Interp. [None]      Mode [Repitch]   Semi/Fine [0][0]
+-- One pane: two columns, five rows (the details stay under the panel).
 -- Labels start flush on the left in a column of their own, the controls
--- start flush after it; every control block is the same width (C.CW). Every
--- width is fixed, so it looks the same anywhere.
+-- start flush after it. Every width is fixed, so it looks the same anywhere.
 C.LAYOUT = {
-  one = { { "prehear", "oct" }, { "pan", "semi" }, { "loop", "fine" },
-          { "sync", "interp" }, { "mode", "output" } },
-}
--- two panes: four columns, three rows (the Multi-Sample list is two rows
--- shorter to match): level and loop, pitch, Beatsync, the sampler's end
-C.LAYOUT.two = {
-  { "prehear", "oct", "sync", "interp" },
-  { "pan", "semi", "mode", "output" },
-  { "loop", "fine" },
+  one = { { "prehear", "sync" }, { "output", "mode" }, { "interp", "loop" },
+          { "oct", "pitch" }, { "pan" } },
+  two = { { "prehear", "oct", "sync" },
+          { "output", "pan", "loop" },
+          { "interp", "mode", "pitch" } },
 }
 C.LABELS = { prehear = "Volume", oct = "Octave", output = "Output",
-             loop = "Loop", interp = "Interpolation", sync = "Beatsync",
-             semi = "Semitone", fine = "Fine tune", pan = "Panning",
-             mode = "Mode" }
-C.LABEL_PX = { prehear = 50, oct = 50, output = 50, loop = 36, interp = 78,
-               sync = 58, semi = 50, fine = 58, pan = 52, mode = 36 }
+             loop = "Loop", interp = "Interp.", sync = "Beatsync",
+             pitch = "Semi/Fine", pan = "Panning", mode = "Mode" }
+C.LABEL_PX = { prehear = 50, oct = 50, output = 50, loop = 36, interp = 44,
+               sync = 58, pitch = 56, pan = 50, mode = 36 }
 C.MODE_ITEMS = { "Repitch", "Percussion", "Texture" }   -- Beatsync's modes
 C.OUTPUT_ITEMS = { "Master", "Track" }     -- where the prehear plays
 C.ROW_H = C.ROW_HEIGHT + 4                 -- a row of framed controls
@@ -5736,30 +5781,32 @@ function C.label_w(c)
   return w
 end
 
--- every control block (2 px round each control included): what the
--- single pane leaves after its two label columns, in two equal halves
-function C.label_max(rows, c)
-  local w = 0
-  for _, row in ipairs(rows) do
-    if row[c] then w = math.max(w, C.LABEL_PX[row[c]]) end
+-- the controls of a cell, after its label: { view id, width (2 px round) }.
+-- Each is as wide as its content needs; the cells of a column add up to
+-- (nearly) the same width: 80 / 88 / 112.
+C.CELL_ITEMS = {
+  prehear = { { "speaker", 28 }, { "prehear_vol", 52 } },
+  output = { { "output", 80 } }, interp = { { "interp", 80 } },
+  oct = { { "octave", 80 } }, pan = { { "pan", 80 } },
+  mode = { { "mode", 88 } },
+  sync = { { "sync", 24 }, { "slen", 64 }, { "sync_t", 24 } },
+  loop = { { "loop", 84 }, { "xfade_btn", 28 } },
+  pitch = { { "semi", 56 }, { "fine", 56 } },
+}
+-- the width of a control as built (its frame adds 4)
+function C.iw(id)
+  for _, items in pairs(C.CELL_ITEMS) do
+    for _, it in ipairs(items) do
+      if it[1] == id then return it[2] - 4 end
+    end
   end
+end
+-- the width of a cell's controls
+function C.cell_w(k)
+  local w = 0
+  for _, it in ipairs(C.CELL_ITEMS[k]) do w = w + it[2] end
   return w
 end
-C.CW = math.floor((PANEL_WIDTH + 2 - SCROLLBAR_WIDTH - 2
-                   - (C.label_max(C.LAYOUT.one, 1) + 4)
-                   - (C.label_max(C.LAYOUT.one, 2) + 4)) / 2)
-local CW = C.CW
--- the controls of a cell, after its label: { view id, width (2 px round) }
-C.CELL_ITEMS = {
-  prehear = { { "speaker", 28 }, { "prehear_vol", CW - 28 } },
-  loop = { { "loop", CW - 28 }, { "xfade_btn", 28 } },
-  oct = { { "octave", CW } }, interp = { { "interp", CW } },
-  output = { { "output", CW } },
-  sync = { { "sync", 24 }, { "slen", CW - 24 } },
-  mode = { { "mode", CW - 24 }, { "sync_t", 24 } },
-  semi = { { "semi", CW } }, fine = { { "fine", CW } },
-  pan = { { "pan", CW } },
-}
 C.KIT_BOTTOM_STOPS = { kit_mode = true, kit_start = true, kit_white = true,
   kit_overlap = true, kb_new = true, kb_remove = true, kb_clear = true }
 
@@ -5774,19 +5821,22 @@ function C.grid_plan()
   local inner = C.edge() - 2
   local n = #rows[1]
   local widths = {}
-  if n > 2 then                         -- two panes: each column as wide as
-    local used = 0                      -- it needs, the rest shared out
-    for c = 1, n do
-      widths[c] = C.label_w(c) + 4 + CW
-      used = used + widths[c]
+  local used = 0                        -- each column as wide as it needs,
+  for c = 1, n do                       -- the rest shared out
+    local block = 0
+    for _, row in ipairs(rows) do
+      if row[c] then block = math.max(block, C.cell_w(row[c])) end
     end
-    local more = math.floor((inner - used) / n)
-    for c = 1, n do widths[c] = widths[c] + more end
-    widths[n] = widths[n] + (inner - used - more * n)
-  else                                  -- one pane: the first just fits
-    local c1 = C.label_w(1) + 4 + CW
-    widths = { c1, inner - c1 }
+    widths[c] = C.label_w(c) + 4 + block
+    used = used + widths[c]
   end
+  if n == 2 then                        -- one pane: shared out. Two panes:
+    local more = math.floor((inner - used) / n)   -- the rest is the file
+    for c = 1, n do widths[c] = widths[c] + more end   -- details' (info_side)
+    widths[n] = widths[n] + (inner - used - more * n)
+    used = inner
+  end
+  C.grid_used = used
   local plan = {}
   for r, row in ipairs(rows) do
     local x = 1
@@ -5821,7 +5871,7 @@ function C.place_cells()
     end)
     if ok then S.layout_mode = mode end
   end
-  for r = 4, 5 do                      -- the rows this layout has
+  for r = 1, 5 do                      -- the rows this layout has
     local row = view("srow" .. r)
     if row then row.visible = r <= #C.LAYOUT[mode] end
   end
@@ -5830,6 +5880,24 @@ function C.place_cells()
     if cell then cell.width = p.w end
     local lbl = view("lbl_" .. k)
     if lbl then lbl.width = C.label_w(p.col) end
+  end
+  -- two panes: the file details take the width the grid leaves
+  local side = view("info_side")
+  if side then
+    local two = two_pane()
+    side.visible = two
+    if two then   -- two columns of label + value in the room the grid leaves
+      local room = math.max(120, C.edge() - 2 - C.grid_used - 4)
+      local c1 = math.floor(room * 0.55)
+      local lw = { 44, 34 }
+      for i, f in ipairs(C.INFO_SIDE) do
+        local col = (i % 2 == 1) and 1 or 2
+        local cw = col == 1 and c1 or room - c1
+        local l, v = view("isl_" .. f[1]), view("isv_" .. f[1])
+        if l then l.width = lw[col] end
+        if v then v.width = math.max(20, cw - lw[col]) end
+      end
+    end
   end
 end
 
@@ -6121,6 +6189,7 @@ apply_layout = function()
     info.width = C.full_width()
     C.size_info()
   end
+  refresh_info_box()
   if S.wave_view then
     S.wave_view.width = w - 2   -- inside the 1 px frame
     S.wave_view.height = C.wave_h()
@@ -7943,7 +8012,6 @@ local function build_ui()
     S.cells[k] = vb:horizontal_aligner { id = "cell_" .. k, mode = "left",
                                          width = 100, r }
   end
-  local W1 = C.CW - 4                       -- a control block, without its round
   -- left: hearing it
   cell("prehear",
     pad(icon_button({
@@ -7954,12 +8022,12 @@ local function build_ui()
       notifier = toggle_autoplay,
     }, prefs.autoplay.value and "prehear_on" or "prehear_off", "P")),
     C.framed(vb, "minislider", {
-      id = "prehear_vol", width = W1 - 28, height = H,
+      id = "prehear_vol", width = C.iw("prehear_vol"), height = H,
       min = 0, max = 1, default = 0.9, bind = prefs.prehear_volume,
       tooltip = "Prehear volume (double-click: back to default)",
     }))
   cell("oct", C.framed(vb, "valuebox", {
-    id = "octave", width = W1, height = H, min = 0, max = 8,
+    id = "octave", width = C.iw("octave"), height = H, min = 0, max = 8,
     value = renoise.song().transport.octave,
     tooltip = "Renoise's global octave: the piano keys play from it. Your "
            .. "own octave keys work while the browser is open.",
@@ -7970,7 +8038,7 @@ local function build_ui()
     end,
   }))
   cell("output", C.framed(vb, "popup", {
-    id = "output", width = W1, height = H, items = C.OUTPUT_ITEMS,
+    id = "output", width = C.iw("output"), height = H, items = C.OUTPUT_ITEMS,
     value = prefs.prehear_master.value and 1 or 2,
     tooltip = "Where the prehear plays: the Master track (as Renoise's own "
            .. "browser), or the selected track and its effects\n"
@@ -7983,7 +8051,7 @@ local function build_ui()
   -- right: how the sample plays
   cell("loop",
     C.framed(vb, "popup", {
-      id = "loop", width = W1 - 28, height = H, items = LOOP_ITEMS,
+      id = "loop", width = C.iw("loop"), height = H, items = LOOP_ITEMS,
       value = 1,
       tooltip = "Loop of the highlighted sample - it keeps it when you "
              .. "load it. Making a loop (loop flags, Ctrl-Shift-L, "
@@ -7991,7 +8059,7 @@ local function build_ui()
              .. "Options > Default loop.\n"
              .. "(key binding: Global > Simple Browser > Cycle Loop Mode)",
       notifier = function(v)
-        if not S.updating_loop then C.set_loop_mode(v) end
+        if not S.updating_loop then C.try("loop", C.set_loop_mode, v) end
       end,
     }),
     pad(icon_button({
@@ -8003,7 +8071,7 @@ local function build_ui()
       notifier = function() C.do_xfade() end,
     }, "xfade", "X")))
   cell("interp", C.framed(vb, "popup", {
-    id = "interp", width = W1, height = H,
+    id = "interp", width = C.iw("interp"), height = H,
     items = C.INTERP_ITEMS, bind = prefs.default_interp,
     tooltip = "Interpolation of every sample the browser plays and loads "
            .. "(Multi-Sample samples too).\n"
@@ -8023,7 +8091,7 @@ local function build_ui()
       end,
     }),
     C.framed(vb, "valuebox", {
-      id = "slen", width = C.CW - 28, height = H, min = 0, max = 512, value = 0,
+      id = "slen", width = C.iw("slen"), height = H, min = 0, max = 512, value = 0,
       tostring = function(v) return v == 0 and C.sync_zero_text() or tostring(v) end,
       tonumber = function(t)
         t = t:lower()
@@ -8040,16 +8108,8 @@ local function build_ui()
              .. "(key bindings: Global > Simple Browser > Sync Length Up / "
              .. "Sync Length Down)",
       notifier = function(v)
-        if not S.updating_pitch then C.set_pitch("synclen", v) end
+        if not S.updating_pitch then C.try("sync length", C.set_pitch, "synclen", v) end
       end,
-    }))
-  cell("mode",
-    C.framed(vb, "popup", {
-      id = "mode", width = W1 - 24, height = H, items = C.MODE_ITEMS,
-      bind = prefs.sync_mode,
-      tooltip = "Beatsync mode, as in Renoise's sample properties: Repitch / "
-             .. "Time-Stretch (Percussion) / Time-Stretch (Texture).\n"
-             .. "(key binding: Global > Simple Browser > Cycle Beatsync Mode)",
     }),
     C.framed(vb, "button", {
       id = "sync_t", width = 20, height = H, text = "T",
@@ -8061,11 +8121,18 @@ local function build_ui()
              .. "Pitch to Tempo)",
       notifier = function() C.tempo_tune() end,
     }))
+  cell("mode", C.framed(vb, "popup", {
+    id = "mode", width = C.iw("mode"), height = H, items = C.MODE_ITEMS,
+    bind = prefs.sync_mode,
+    tooltip = "Beatsync mode, as in Renoise's sample properties: Repitch / "
+           .. "Time-Stretch (Percussion) / Time-Stretch (Texture).\n"
+           .. "(key binding: Global > Simple Browser > Cycle Beatsync Mode)",
+  }))
   -- the pitch of the highlighted sample (a file: kept when it is loaded; a
   -- Multi-Sample row: that sample itself), see C.pitch_target
-  cell("semi", C.framed(vb, "valuebox", {
-    id = "semi", width = W1, height = H, min = -120, max = 120, value = 0,
-    tostring = function(v) return string.format("%d st", v) end,
+  cell("pitch", C.framed(vb, "valuebox", {
+    id = "semi", width = C.iw("semi"), height = H, min = -120, max = 120, value = 0,
+    tostring = function(v) return string.format("%d", v) end,   -- (semitones: the label says)
     tonumber = function(s) return tonumber(s:match("^%s*([+-]?%d+)")) end,
     tooltip = "Semitone (transpose) of the highlighted sample: a file keeps "
            .. "it when you load it, a Multi-Sample row changes that sample. "
@@ -8073,11 +8140,11 @@ local function build_ui()
            .. "(key bindings: Global > Simple Browser > Semitone Up / "
            .. "Semitone Down)",
     notifier = function(v)
-      if not S.updating_pitch then C.set_pitch("transpose", v) end
+      if not S.updating_pitch then C.try("semitone", C.set_pitch, "transpose", v) end
     end,
-  }))
-  cell("fine", C.framed(vb, "valuebox", {
-    id = "fine", width = W1, height = H, min = -127, max = 127, value = 0,
+  }),
+  C.framed(vb, "valuebox", {
+    id = "fine", width = C.iw("fine"), height = H, min = -127, max = 127, value = 0,
     tostring = function(v) return string.format("%d", v) end,
     tonumber = function(t) return tonumber(t:match("^%s*([+-]?%d+)")) end,
     tooltip = "Fine tune of the highlighted sample, as in Renoise's sample "
@@ -8085,11 +8152,11 @@ local function build_ui()
            .. "(key bindings: Global > Simple Browser > Fine Tune Up / "
            .. "Fine Tune Down)",
     notifier = function(v)
-      if not S.updating_pitch then C.set_pitch("fine_tune", v) end
+      if not S.updating_pitch then C.try("fine tune", C.set_pitch, "fine_tune", v) end
     end,
   }))
   cell("pan", C.framed(vb, "valuebox", {
-    id = "pan", width = W1, height = H, min = -50, max = 50, value = 0,
+    id = "pan", width = C.iw("pan"), height = H, min = -50, max = 50, value = 0,
     tostring = function(v) return C.pan_text(v) end,
     tonumber = function(t)
       t = t:lower()
@@ -8104,13 +8171,31 @@ local function build_ui()
            .. "(key bindings: Global > Simple Browser > Panning Left / "
            .. "Panning Right)",
     notifier = function(v)
-      if not S.updating_pitch then C.set_pitch("panning", v) end
+      if not S.updating_pitch then C.try("panning", C.set_pitch, "panning", v) end
     end,
   }))
+  -- the grid's rows, and (two panes) the file details beside them, in the
+  -- room the three columns leave
+  local info_side = vb:column { id = "info_side", visible = two_pane() }
+  for i = 1, #C.INFO_SIDE, 2 do
+    local r = vb:row {}
+    for j = i, i + 1 do
+      local f = C.INFO_SIDE[j]
+      r:add_child(vb:text { id = "isl_" .. f[1], text = f[2], font = "bold",
+                            width = 40 })
+      r:add_child(vb:text { id = "isv_" .. f[1], text = "-", width = 50 })
+    end
+    info_side:add_child(r)
+  end
   local sample_panel = vb:column {
     id = "sample_panel", style = "group", margin = 1, visible = prefs.show_controls.value,
-    vb:row { id = "srow1" }, vb:row { id = "srow2" }, vb:row { id = "srow3" },
-    vb:row { id = "srow4" }, vb:row { id = "srow5" },
+    vb:row {
+      vb:column {
+        vb:row { id = "srow1" }, vb:row { id = "srow2" }, vb:row { id = "srow3" },
+        vb:row { id = "srow4" }, vb:row { id = "srow5" },
+      },
+      info_side,
+    },
   }
 
   local panels = vb:row {
@@ -8257,7 +8342,7 @@ local function build_ui()
         })),
       kcell(3, pad(vb:text { id = "lbl_overlap", text = "Overlap" }),
         C.framed(vb, "popup", {
-          id = "kit_overlap", width = C.W.popup, height = H,
+          id = "kit_overlap", width = 56, height = H,
           items = OVERLAP_ITEMS, bind = prefs.overlap,
           tooltip = "What a key does when several samples share it: play "
                  .. "all of them, cycle through them, or pick one at random",
@@ -8347,14 +8432,23 @@ local function build_ui()
     { id = "octave", frame = "frame_octave", name = "Octave", min = 0, max = 8,
       get = function() return renoise.song().transport.octave end,
       set = function(v) renoise.song().transport.octave = v end },
+    { id = "sync", frame = "frame_sync", name = "Beatsync",
+      act = function() prefs.sync_tempo.value = not prefs.sync_tempo.value end,
+      show = function() return prefs.sync_tempo.value and "on" or "off" end },
+    { id = "slen", frame = "frame_slen", name = "Sync length", min = 0, max = 512,
+      get = function() return C.pitch_value("synclen") end,
+      set = function(v) C.set_pitch("synclen", v) end,
+      show = function() return C.pitch_text("synclen") end },
+    { id = "sync_t", frame = "frame_sync_t", name = "Pitch to tempo (T)",
+      act = function() C.tempo_tune() end },
+    { id = "output", frame = "frame_output", name = "Prehear output",
+      n = #C.OUTPUT_ITEMS,
+      get = function() return prefs.prehear_master.value and 1 or 2 end,
+      set = function(v) prefs.prehear_master.value = v == 1 end },
     { id = "pan", frame = "frame_pan", name = "Panning", min = -50, max = 50,
       get = function() local _, p = C.pitch_target() return p and C.PITCH.panning.get(p) or 0 end,
       set = function(v) C.set_pitch("panning", v) end,
       show = function() return C.pitch_text("panning") end },
-    { id = "semi", frame = "frame_semi", name = "Semitone", min = -120, max = 120,
-      get = function() local _, p = C.pitch_target() return p and p.transpose or 0 end,
-      set = function(v) C.set_pitch("transpose", v) end,
-      show = function() return C.pitch_text("transpose") end },
     { id = "loop", frame = "frame_loop", name = "Loop", n = #LOOP_ITEMS,
       get = function()
         local smp = C.preview_smp()
@@ -8370,27 +8464,18 @@ local function build_ui()
         end
         return S.sel_range and "the selection" or "the loop"
       end },
-    { id = "fine", frame = "frame_fine", name = "Fine tune", min = -127, max = 127,
-      get = function() local _, p = C.pitch_target() return p and p.fine_tune or 0 end,
-      set = function(v) C.set_pitch("fine_tune", v) end,
-      show = function() return C.pitch_text("fine_tune") end },
-    { id = "sync", frame = "frame_sync", name = "Beatsync",
-      act = function() prefs.sync_tempo.value = not prefs.sync_tempo.value end,
-      show = function() return prefs.sync_tempo.value and "on" or "off" end },
-    { id = "slen", frame = "frame_slen", name = "Sync length", min = 0, max = 512,
-      get = function() return C.pitch_value("synclen") end,
-      set = function(v) C.set_pitch("synclen", v) end,
-      show = function() return C.pitch_text("synclen") end },
     pref_stop { id = "interp", pref = "default_interp", frame = "frame_interp",
       name = "Interpolation", n = #C.INTERP_ITEMS },
     pref_stop { id = "mode", pref = "sync_mode", frame = "frame_mode",
       name = "Beatsync mode", n = #C.MODE_ITEMS },
-    { id = "sync_t", frame = "frame_sync_t", name = "Pitch to tempo (T)",
-      act = function() C.tempo_tune() end },
-    { id = "output", frame = "frame_output", name = "Prehear output",
-      n = #C.OUTPUT_ITEMS,
-      get = function() return prefs.prehear_master.value and 1 or 2 end,
-      set = function(v) prefs.prehear_master.value = v == 1 end },
+    { id = "semi", frame = "frame_semi", name = "Semitone", min = -120, max = 120,
+      get = function() local _, p = C.pitch_target() return p and p.transpose or 0 end,
+      set = function(v) C.set_pitch("transpose", v) end,
+      show = function() return C.pitch_text("transpose") end },
+    { id = "fine", frame = "frame_fine", name = "Fine tune", min = -127, max = 127,
+      get = function() local _, p = C.pitch_target() return p and p.fine_tune or 0 end,
+      set = function(v) C.set_pitch("fine_tune", v) end,
+      show = function() return C.pitch_text("fine_tune") end },
     -- the Multi-Sample: its header, mode and settings, buttons
     { id = "kit_keyjazz", when = kit_on, name = "Multi-Sample keyjazz",
       act = function() C.toggle_kit_keyjazz() end },
